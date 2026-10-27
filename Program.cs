@@ -1,0 +1,49 @@
+using api;
+using api.Entitis;
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Services.AddControllers();
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddOutputCache(opciones =>
+{
+    opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(60);
+});
+
+
+builder.Services.AddOpenApi();
+
+builder.Services.AddSingleton<IRepositorio, RepositorioEnMemoria>();
+builder.Services.AddSingleton<IRepositorio, RepositorioSQLServer>();
+
+builder.Services.AddTransient<ServicioTransient>();
+builder.Services.AddScoped<ServicioScoped>();
+builder.Services.AddSingleton<ServicioSingleton>();
+
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+app.UseOutputCache();
+
+app.MapControllers();
+
+app.Run();
